@@ -1,0 +1,77 @@
+
+html, body {
+    height: 100%;
+}
+
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+}
+
+/* Container principal que esconde o que sai da tela */
+.logos-slider {
+    overflow: hidden;
+    padding: 30px 0;
+    background: white;
+    white-space: nowrap;
+    position: relative;
+}
+
+/* O "trilho" que vai se mover */
+.logos-slider-track {
+    display: inline-block;
+    animation: scroll 30s linear infinite; /* 30s é a velocidade, aumente para ir mais devagar */
+}
+
+.logos-slider-track img {
+    height: 50px; /* Altura padrão dos logos */
+    margin: 0 40px; /* Espaçamento entre os logos */
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.logos-slider-track img:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* A animação que move o trilho da direita para a esquerda */
+@keyframes scroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%); /* Move metade do conteúdo (que é a lista repetida) */
+    }
+}
+
+/* Pausa a animação quando o usuário passa o mouse por cima */
+.logos-slider:hover .logos-slider-track {
+    animation-play-state: paused;
+}
+
+/* Garante que o mapa não fique com bordas estranhas */
+.ratio iframe {
+    filter: contrast(1.1) brightness(1);
+    transition: all 0.3s ease;
+}
+
+/* Efeito de destaque no card do mapa */
+#localizacao .card {
+    transition: transform 0.3s ease;
+}
+
+#localizacao .card:hover {
+    transform: translateY(-5px);
+}
