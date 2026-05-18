@@ -8,7 +8,10 @@ use App\Models\PontoColeta;
 class PontosColetaController extends Controller
 {
     public function index(){
-        return view('site.pontos-coleta');
+
+        $pontos = PontoColeta::all();
+
+        return view('site.pontos-coleta', compact('pontos'));
     }
      public function store(Request $request){
         //criar novos aviso

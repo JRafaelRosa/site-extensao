@@ -13,7 +13,7 @@
 </section>
 
 <div class="container py-5">
-    
+
     <!-- Introdução -->
     <div class="row justify-content-center mb-5">
         <div class="col-lg-8 text-center">
@@ -25,54 +25,30 @@
     </div>
 
     <div class="row g-4">
-        
-        <!-- Parceiro 1: Acadêmico -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-4 d-flex justify-content-center align-items-center" style="height: 100px;">
-                        <img src="https://via.placeholder.com/180x80?text=UEPG" class="img-fluid" alt="Logo UEPG">
-                    </div>
-                    <h5 class="fw-bold">UEPG</h5>
-                    <p class="badge bg-info text-dark">Parceiro Acadêmico</p>
-                    <p class="text-secondary small" style="text-align: justify;">
-                        Responsável pela infraestrutura, coordenação técnica sob a supervisão do <strong>Prof. Dr. Zito Palhano da Fonseca</strong> e mobilização do corpo acadêmico para as campanhas de coleta.
-                    </p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Parceiro 2: Poder Público -->
+    @foreach($parceiros as $parceiro)
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body text-center p-4">
-                    <div class="mb-4 d-flex justify-content-center align-items-center" style="height: 100px;">
-                        <img src="https://via.placeholder.com/180x80?text=Prefeitura" class="img-fluid" alt="Logo Prefeitura">
-                    </div>
-                    <h5 class="fw-bold">Prefeitura Municipal</h5>
-                    <p class="badge bg-success">Apoio Governamental</p>
-                    <p class="text-secondary small" style="text-align: justify;">
-                        Atua no suporte à logística de transporte e na divulgação do projeto nos canais oficiais do município, integrando o projeto ao plano de gestão de resíduos sólidos da cidade.
-                    </p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Parceiro 3: Empresa de Reciclagem -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-4 d-flex justify-content-center align-items-center" style="height: 100px;">
-                        <img src="https://via.placeholder.com/180x80?text=Empresa+X" class="img-fluid" alt="Logo Empresa">
+                    <div class="mb-4 d-flex justify-content-center align-items-center" style="height: 100px; overflow: hidden;">
+                        <img src="{{ asset($parceiro->logo) }}"
+                            class="img-fluid"
+                            style="max-height: 100%; object-fit: contain;"
+                            alt="Logo {{ $parceiro->nome }}">
                     </div>
-                    <h5 class="fw-bold">Recicla Tech S.A.</h5>
-                    <p class="badge bg-primary">Destinação Final</p>
+
+                    <h5 class="fw-bold">{{ $parceiro->nome }}</h5>
+
+                    <p class="badge bg-primary">{{ $parceiro->tipo }}</p>
+
                     <p class="text-secondary small" style="text-align: justify;">
-                        Empresa especializada em manufatura reversa que recebe o material coletado para a extração segura de componentes e reciclagem de metais preciosos.
+                        {{ $parceiro->descricao }}
                     </p>
                 </div>
             </div>
         </div>
+    @endforeach
 
     </div>
 

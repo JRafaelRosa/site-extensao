@@ -26,13 +26,14 @@ Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 |--------------------------------------------------------------------------
 | Rotas Administrativas (Ações do ADM)
 |--------------------------------------------------------------------------
-| 
+|
 */
 Route::prefix('app')->name('app.')->group(function() {
 
     Route::post('/sobre-nos', [SobreNosController::class, 'store'])->name('sobre-nos.store');
     Route::post('/pontos-coleta', [PontosColetaController::class, 'store'])->name('pontos-coleta.store');
     Route::post('/avisos', [AvisosController::class, 'store'])->name('avisos.store');
+    Route::delete('/avisos/{aviso}', [AvisosController::class, 'delete'])->name('avisos.delete');
     Route::post('/parceiros', [ParceiroController::class,'store'])->name('parceiros.store');
 
 });

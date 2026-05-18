@@ -36,59 +36,40 @@
 
     <!-- Listagem de Pontos -->
     <h2 class="h4 fw-bold mb-4 border-start border-primary border-4 ps-3 text-uppercase">Nossos Pontos em Ponta Grossa</h2>
-    
+
     <div class="row g-4">
-        
-        <!-- Ponto 1: CSL (O principal) -->
+
+    @foreach($pontos as $ponto)
         <div class="col-md-6 col-xl-4">
             <div class="card h-100 border-0 shadow-sm overflow-hidden">
-                <div class="bg-primary py-2 px-3 text-white small fw-bold">PONTO PRINCIPAL</div>
-                <div class="card-body">
-                    <h5 class="fw-bold">Central de Salas (CSL)</h5>
-                    <p class="small text-muted"><i class="bi bi-geo-alt-fill me-1"></i> Campus Uvaranas - UEPG</p>
+
+                @if($loop->first)
+                    <div class="bg-primary py-2 px-3 text-white small fw-bold">PONTO PRINCIPAL</div>
+                @endif
+
+                <div class="card-body {{ !$loop->first ? 'pt-4' : '' }}">
+                    <h5 class="fw-bold">{{ $ponto->nome }}</h5>
+
+                    <p class="small text-muted">
+                        <i class="bi bi-geo-alt-fill me-1"></i> {{ $ponto->localizacao }}
+                    </p>
+
                     <hr>
+
                     <ul class="list-unstyled small text-secondary mb-4">
-                        <li><strong>Horário:</strong> 08h às 18h (Seg-Sex)</li>
-                        <li><strong>Itens:</strong> Informática e Telecom</li>
+                        <li class="mb-2"><strong>Horário:</strong> {{ $ponto->horario }}</li>
+                        <li><strong>Descrição:</strong> {{ $ponto->descricao }}</li>
                     </ul>
-                    <a href="https://maps.app.goo.gl/TYCqJbPcsgDidEp69" target="_blank" class="btn btn-outline-primary btn-sm w-100">
+
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($ponto->localizacao) }}"
+                       target="_blank"
+                       class="btn {{ $loop->first ? 'btn-outline-primary' : 'btn-outline-secondary' }} btn-sm w-100">
                         Como Chegar
                     </a>
                 </div>
             </div>
         </div>
-
-        <!-- Ponto 2: Campus Central -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body pt-4">
-                    <h5 class="fw-bold">Campus Central</h5>
-                    <p class="small text-muted"><i class="bi bi-geo-alt-fill me-1"></i> Praça Santos Andrade, Centro</p>
-                    <hr>
-                    <ul class="list-unstyled small text-secondary mb-4">
-                        <li><strong>Horário:</strong> 08h às 17h (Seg-Sex)</li>
-                        <li><strong>Itens:</strong> Informática e Telecom</li>
-                    </ul>
-                    <button class="btn btn-outline-secondary btn-sm w-100">Como Chegar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ponto 3: Parceiro Externo (Exemplo) -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body pt-4">
-                    <h5 class="fw-bold">Escola Técnica Parceira</h5>
-                    <p class="small text-muted"><i class="bi bi-geo-alt-fill me-1"></i> Bairro Oficinas</p>
-                    <hr>
-                    <ul class="list-unstyled small text-secondary mb-4">
-                        <li><strong>Horário:</strong> 13h às 21h (Seg-Sex)</li>
-                        <li><strong>Itens:</strong> Somente Periféricos</li>
-                    </ul>
-                    <button class="btn btn-outline-secondary btn-sm w-100">Como Chegar</button>
-                </div>
-            </div>
-        </div>
+    @endforeach
 
     </div>
 

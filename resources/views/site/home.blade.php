@@ -4,7 +4,6 @@
 
 @section('content')
 
-<!-- Hero Section: Destaque Principal -->
 <section class="bg-primary text-light py-5 mb-5 shadow-sm">
     <div class="container text-center">
         <h1 class="display-4 fw-bold">Projeto de Extensão: Coleta de Lixo Eletrônico</h1>
@@ -13,15 +12,33 @@
 </section>
 
 <div class="container pb-5">
+    
+    @if(session('sucesso'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('sucesso') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <ul class="mb-0 small">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="row g-4">
-        
-        <!-- Coluna da Esquerda (Conteúdo Principal) -->
+
         <div class="col-lg-8">
             <section class="mb-5">
                 <h2 class="h3 border-start border-primary border-4 ps-3 mb-4 fw-bold">Objetivo</h2>
                 <p class="text-secondary" style="text-align: justify;">
-                    Este projeto visa conscientizar a comunidade sobre o descarte correto de resíduos tecnológicos. 
-                    O acúmulo inadequado de componentes eletrônicos libera metais pesados no solo, prejudicando o meio ambiente e a saúde pública. 
+                    Este projeto visa conscientizar a comunidade sobre o descarte correto de resíduos tecnológicos.
+                    O acúmulo inadequado de componentes eletrônicos libera metais pesados no solo, prejudicando o meio ambiente e a saúde pública.
                     Nossa missão é facilitar esse processo através de educação e logística eficiente.
                 </p>
                 <p class="text-secondary">
@@ -32,62 +49,73 @@
             <section class="mb-5">
                 <h2 class="h3 border-start border-primary border-4 ps-3 mb-4 fw-bold">Sobre o Projeto</h2>
                 <p class="text-secondary">
-                    Desenvolvido por acadêmicos e professores, o projeto de extensão une tecnologia e responsabilidade social. 
+                    Desenvolvido por acadêmicos e professores, o projeto de extensão une tecnologia e responsabilidade social.
                     Realizamos campanhas de coleta e palestras em escolas e empresas locais.
                 </p>
             </section>
         </div>
 
-        <!-- Coluna da Direita (Avisos do ADM) -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-dark text-white fw-bold py-3">
                     <i class="bi bi-megaphone-fill me-2"></i>Avisos Recentes
                 </div>
                 <div class="card-body">
-                    <!-- Exemplo de Aviso -->
-                    <div class="pb-3 border-bottom mb-3">
-                        <span class="badge bg-primary mb-2">Novo</span>
-                        <h6 class="fw-bold mb-1">Próxima Coleta Coletiva</h6>
-                        <p class="small text-muted mb-2">Data: 20 de Junho - Campus Uvaranas</p>
-                        <p class="small text-secondary">Estaremos recebendo monitores, teclados e baterias das 09h às 17h.</p>
-                    </div>
+                    
+                    @forelse($avisos->take(3) as $aviso)
+                        @php $dataCarbon = \Carbon\Carbon::parse($aviso->data); @endphp
+                        
+                        <div class="pb-3 border-bottom mb-3">
+                            @if($dataCarbon->isToday())
+                                <span class="badge bg-warning text-dark mb-2 animate-pulse">É HOJE!</span>
+                            @elseif($loop->first)
+                                <span class="badge bg-primary mb-2">Novo</span>
+                            @endif
+                            
+                            <h6 class="fw-bold mb-1">{{ $aviso->titulo }}</h6>
+                            <p class="small text-muted mb-2">Data: {{ $dataCarbon->format('d/m/Y') }}</p>
+                            <p class="small text-secondary mb-2">{{ $aviso->descricao }}</p>
 
-                    <!-- Botão de exemplo para o ADM (Sua ideia do POST) -->
-                    {{-- Aqui você usará o @auth futuramente --}}
-                    <div class="d-grid mt-3">
-                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAviso">
-                            + Adicionar Aviso (Admin)
-                        </button>
-                    </div>
+                            @auth
+                                <form action="{{ route('app.avisos.delete', $aviso->id) }}" method="POST" onsubmit="return confirm('Deseja apagar este aviso?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-link text-danger p-0 m-0 btn-sm text-decoration-none" style="font-size: 0.8rem;">
+                                        <i class="bi bi-trash3-fill me-1"></i>Remover
+                                    </button>
+                                </form>
+                            @endauth
+                        </div>
+                    @empty
+                        <p class="text-muted small text-center my-3">Nenhum aviso publicado recentemente.</p>
+                    @endforelse
+
+                    @auth
+                        <div class="d-grid mt-3">
+                            <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAviso">
+                                <i class="bi bi-plus-circle me-1"></i> Adicionar Aviso (Admin)
+                            </button>
+                        </div>
+                    @endauth
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Seção de Parceiros com Carrossel -->
 <section class="py-5 bg-white border-top">
     <div class="container">
         <h2 class="h4 text-center mb-5 fw-bold text-uppercase" style="letter-spacing: 2px;">Nossos Parceiros</h2>
-        
+
         <div class="logos-slider">
             <div class="logos-slider-track">
-                <!-- Lista de Logos (Primeira vez) -->
-                <img src="https://via.placeholder.com/150x60?text=UEPG" alt="UEPG">
-                <img src="https://via.placeholder.com/150x60?text=Prefeitura" alt="Prefeitura">
-                <img src="https://via.placeholder.com/150x60?text=Empresa+A" alt="Parceiro A">
-                <img src="https://via.placeholder.com/150x60?text=Empresa+B" alt="Parceiro B">
-                <img src="https://via.placeholder.com/150x60?text=ONG+Eco" alt="ONG Eco">
-                <img src="https://via.placeholder.com/150x60?text=Instituto+X" alt="Instituto X">
+                @foreach($parceiros as $parceiro)
+                    <img src="{{ asset($parceiro->logo) }}" alt="{{ $parceiro->nome }}">
+                @endforeach
 
-                <!-- Repetição dos mesmos Logos (Para o loop infinito não ter buracos) -->
-                <img src="https://via.placeholder.com/150x60?text=UEPG" alt="UEPG">
-                <img src="https://via.placeholder.com/150x60?text=Prefeitura" alt="Prefeitura">
-                <img src="https://via.placeholder.com/150x60?text=Empresa+A" alt="Parceiro A">
-                <img src="https://via.placeholder.com/150x60?text=Empresa+B" alt="Parceiro B">
-                <img src="https://via.placeholder.com/150x60?text=ONG+Eco" alt="ONG Eco">
-                <img src="https://via.placeholder.com/150x60?text=Instituto+X" alt="Instituto X">
+                @foreach($parceiros as $parceiro)
+                    <img src="{{ asset($parceiro->logo) }}" alt="{{ $parceiro->nome }}">
+                @endforeach
             </div>
         </div>
     </div>
@@ -96,11 +124,10 @@
 <section id="localizacao" class="py-5 bg-light">
     <div class="container">
         <div class="row g-4 align-items-center">
-            
-            <!-- Coluna de Informações -->
+
             <div class="col-lg-5">
                 <h2 class="h3 fw-bold mb-4 border-start border-primary border-4 ps-3">Onde nos encontrar</h2>
-                
+
                 <div class="mb-4">
                     <h5 class="fw-bold"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Endereço</h5>
                     <p class="text-secondary">Campus Uvaranas - UEPG<br>
@@ -121,22 +148,20 @@
                     <p class="text-secondary">(42) 3220-3000<br>contato@lixoeletronico.uepg.br</p>
                 </div>
 
-                {{-- Espaço para o botão de ADM que você comentou --}}
                 <div class="mt-4">
-                    <button class="btn btn-primary shadow-sm">
+                    <a href="https://maps.google.com" target="_blank" class="btn btn-primary shadow-sm">
                         Ver no Google Maps
-                    </button>
+                    </a>
                 </div>
             </div>
 
-            <!-- Coluna do Mapa -->
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
                     <div class="ratio ratio-16x9">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1806.6056826287581!2d-50.10539018732683!3d-25.094705496485563!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94e81b7f6f703cb3%3A0x66e2ab3ff3f57db4!2sHall%20Tecnol%C3%B3gico%20-%20Uvaranas%2C%20Ponta%20Grossa%20-%20PR!5e0!3m2!1spt-BR!2sbr!4v1778769115966!5m2!1spt-BR!2sbr" 
-                            style="border:0;" 
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1806.6056826287581!2d-50.10539018732683!3d-25.094705496485563!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94e81b7f6f703cb3%3A0x66e2ab3ff3f57db4!2sHall%20Tecnol%C3%B3gico%20-%20Uvaranas%2C%20Ponta%20Grossa%20-%20PR!5e0!3m2!1spt-BR!2sbr!4v1778769115966!5m2!1spt-BR!2sbr"
+                            style="border:0;"
                             allowfullscreen=""
-                            loading="lazy" 
+                            loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
                     </div>
@@ -146,4 +171,41 @@
         </div>
     </div>
 </section>
+
+@auth
+<div class="modal fade" id="modalAviso" tabindex="-1" aria-labelledby="modalAvisoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold" id="modalAvisoLabel"><i class="bi bi-megaphone me-2"></i>Novo Aviso do Administrador</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('app.avisos.store') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label small fw-bold text-secondary text-uppercase">Título do Comunicado</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required placeholder="Ex: Mutirão de Coleta Semanal">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="data" class="form-label small fw-bold text-secondary text-uppercase">Data de Execução</label>
+                        <input type="date" class="form-control" id="data" name="data" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label small fw-bold text-secondary text-uppercase">Descrição Completa</label>
+                        <textarea class="form-control" id="descricao" name="descricao" rows="4" required placeholder="Informe os detalhes, horários e pontos de encontro..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">Publicar Agora</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endauth
+
 @endsection
