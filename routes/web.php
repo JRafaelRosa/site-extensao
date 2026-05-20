@@ -30,10 +30,17 @@ Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 */
 Route::prefix('app')->name('app.')->group(function() {
 
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
     Route::post('/sobre-nos', [SobreNosController::class, 'store'])->name('sobre-nos.store');
+
     Route::post('/pontos-coleta', [PontosColetaController::class, 'store'])->name('pontos-coleta.store');
+    Route::delete('/pontos-coleta/{id}', [PontosColetaController::class, 'destroy'])->name('pontos-coleta.delete');
+   
     Route::post('/avisos', [AvisosController::class, 'store'])->name('avisos.store');
-    Route::delete('/avisos/{aviso}', [AvisosController::class, 'delete'])->name('avisos.delete');
+    Route::delete('/avisos/{id}', [AvisosController::class, 'destroy'])->name('avisos.delete');
+    
     Route::post('/parceiros', [ParceiroController::class,'store'])->name('parceiros.store');
+    Route::delete('/parceiros/{id}', [ParceiroController::class, 'destroy'])->name('parceiros.delete');
 
 });

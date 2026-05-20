@@ -58,23 +58,34 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-dark text-white fw-bold py-3">
-                    <i class="bi bi-megaphone-fill me-2"></i>Avisos Recentes
+                    <i class="bi bi-calendar-event-fill me-2 text-primary"></i>Próximos Eventos
                 </div>
                 <div class="card-body">
                     
-                    @forelse($avisos->take(3) as $aviso)
-                        @php $dataCarbon = \Carbon\Carbon::parse($aviso->data); @endphp
+                    @php
+                   
+                        $eventosProximos = $avisos->filter(function($aviso) {
+                            return $aviso->data ? !\Carbon\Carbon::parse($aviso->data)->isBefore(today()) : true;
+                        })->sortBy(function($aviso) {
+                            return $aviso->data ? \Carbon\Carbon::parse($aviso->data)->timestamp : strtotime('+1 year');
+                        });
+                    @endphp
+
+                    @forelse($eventosProximos->take(3) as $aviso)
+                        @php $dataCarbon = $aviso->data ? \Carbon\Carbon::parse($aviso->data) : null; @endphp
                         
                         <div class="pb-3 border-bottom mb-3">
-                            @if($dataCarbon->isToday())
+                            @if($dataCarbon && $dataCarbon->isToday())
                                 <span class="badge bg-warning text-dark mb-2 animate-pulse">É HOJE!</span>
-                            @elseif($loop->first)
-                                <span class="badge bg-primary mb-2">Novo</span>
+                            @elseif($dataCarbon && $dataCarbon->isTomorrow())
+                                <span class="badge bg-info text-white mb-2">Amanhã</span>
                             @endif
                             
-                            <h6 class="fw-bold mb-1">{{ $aviso->titulo }}</h6>
-                            <p class="small text-muted mb-2">Data: {{ $dataCarbon->format('d/m/Y') }}</p>
-                            <p class="small text-secondary mb-2">{{ $aviso->descricao }}</p>
+                            <h6 class="fw-bold mb-1 text-dark">{{ $aviso->titulo }}</h6>
+                            <p class="small text-muted mb-2">
+                                <i class="bi bi-clock me-1"></i> Data: {{ $dataCarbon ? $dataCarbon->format('d/m/Y') : 'Comunicado Geral' }}
+                            </p>
+                            <p class="small text-secondary mb-2" style="text-align: justify;">{{ $aviso->descricao }}</p>
 
                             @auth
                                 <form action="{{ route('app.avisos.delete', $aviso->id) }}" method="POST" onsubmit="return confirm('Deseja apagar este aviso?')">
@@ -87,13 +98,13 @@
                             @endauth
                         </div>
                     @empty
-                        <p class="text-muted small text-center my-3">Nenhum aviso publicado recentemente.</p>
+                        <p class="text-muted small text-center my-3">Nenhum evento ou aviso agendado para os próximos dias.</p>
                     @endforelse
 
                     @auth
                         <div class="d-grid mt-3">
-                            <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAviso">
-                                <i class="bi bi-plus-circle me-1"></i> Adicionar Aviso (Admin)
+                            <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNovoAviso">
+                                <i class="bi bi-plus-circle me-1"></i> Adicionar Aviso
                             </button>
                         </div>
                     @endauth
@@ -130,7 +141,7 @@
 
                 <div class="mb-4">
                     <h5 class="fw-bold"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Endereço</h5>
-                    <p class="text-secondary">Campus Uvaranas - UEPG<br>
+                    <p class="text-secondary">Bloco L - Campus Uvaranas - UEPG<br>
                     Av. Carlos Cavalcanti, 4748 - Uvaranas<br>
                     Ponta Grossa - PR, 84030-900</p>
                 </div>
@@ -149,7 +160,7 @@
                 </div>
 
                 <div class="mt-4">
-                    <a href="https://maps.google.com" target="_blank" class="btn btn-primary shadow-sm">
+                    <a href="https://maps.app.goo.gl/qMxtNwwScaznrqaQA" target="_blank" class="btn btn-primary shadow-sm">
                         Ver no Google Maps
                     </a>
                 </div>
@@ -173,36 +184,16 @@
 </section>
 
 @auth
-<div class="modal fade" id="modalAviso" tabindex="-1" aria-labelledby="modalAvisoLabel" aria-hidden="true">
+<div class="modal fade" id="modalNovoAviso" tabindex="-1" aria-labelledby="modalNovoAvisoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold" id="modalAvisoLabel"><i class="bi bi-megaphone me-2"></i>Novo Aviso do Administrador</h5>
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white py-3">
+                <h5 class="modal-title fw-bold" id="modalNovoAvisoLabel"><i class="bi bi-megaphone me-2 text-primary"></i>Criar Novo Comunicado</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('app.avisos.store') }}" method="POST">
-                @csrf
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label for="titulo" class="form-label small fw-bold text-secondary text-uppercase">Título do Comunicado</label>
-                        <input type="text" class="form-control" id="titulo" name="titulo" required placeholder="Ex: Mutirão de Coleta Semanal">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="data" class="form-label small fw-bold text-secondary text-uppercase">Data de Execução</label>
-                        <input type="date" class="form-control" id="data" name="data" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="descricao" class="form-label small fw-bold text-secondary text-uppercase">Descrição Completa</label>
-                        <textarea class="form-control" id="descricao" name="descricao" rows="4" required placeholder="Informe os detalhes, horários e pontos de encontro..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light p-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">Publicar Agora</button>
-                </div>
-            </form>
+            
+            @include('app.forms.form_avisos')
+            
         </div>
     </div>
 </div>

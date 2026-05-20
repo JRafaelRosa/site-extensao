@@ -5,9 +5,17 @@
 @section('content')
 
 @php
-    // Compara a data do evento com o dia de hoje (considerando apenas a data, sem horas)
-    $proximos = $avisos->filter(fn($aviso) => !\Carbon\Carbon::parse($aviso->data)->isBefore(today()));
-    $anteriores = $avisos->filter(fn($aviso) => \Carbon\Carbon::parse($aviso->data)->isBefore(today()));
+    $proximos = $avisos->filter(function($aviso) {
+        return $aviso->data && !\Carbon\Carbon::parse($aviso->data)->isBefore(today());
+    })->sortBy(function($aviso) {
+        return \Carbon\Carbon::parse($aviso->data)->timestamp;
+    });
+
+    $comunicadosGerais = $avisos->filter(fn($aviso) => empty($aviso->data));
+
+    $anteriores = $avisos->filter(function($aviso) {
+        return $aviso->data && \Carbon\Carbon::parse($aviso->data)->isBefore(today());
+    });
 @endphp
 
 <section class="bg-primary text-light py-5 mb-5 shadow-sm">
@@ -53,27 +61,23 @@
                     <div class="card border-primary shadow-sm mb-4">
                         <div class="row g-0">
                             <div class="col-md-3 bg-primary text-white d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                                <span class="display-6 fw-bold">
-                                    {{ $dataCarbon->format('d') }}
-                                </span>
-                                <span class="text-uppercase small fw-bold">
-                                    {{ $dataCarbon->translatedFormat('F') }}
-                                </span>
+                                <span class="display-6 fw-bold">{{ $dataCarbon->format('d') }}</span>
+                                <span class="text-uppercase small fw-bold">{{ $dataCarbon->translatedFormat('F') }}</span>
                             </div>
 
                             <div class="col-md-9">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h5 class="card-title fw-bold mb-0">{{ $aviso->titulo }}</h5>
+                                        <h5 class="card-title fw-bold mb-0 text-dark">{{ $aviso->titulo }}</h5>
 
                                         @if($dataCarbon->isToday())
-                                            <span class="badge bg-warning text-dark fw-bold animate-pulse">É HOJE!</span>
+                                            <span class="badge bg-warning text-dark fw-bold">É HOJE!</span>
                                         @else
                                             <span class="badge bg-success text-white">Confirmado</span>
                                         @endif
                                     </div>
 
-                                    <p class="card-text text-secondary small">{{ $aviso->descricao }}</p>
+                                    <p class="card-text text-secondary small" style="text-align: justify;">{{ $aviso->descricao }}</p>
 
                                     <div class="d-flex align-items-center justify-content-between mt-3">
                                         <div class="d-flex align-items-center gap-3">
@@ -100,12 +104,59 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-muted small ps-3">Nenhum evento agendado para os próximos dias.</p>
+                    <p class="text-muted small ps-3">Nenhum evento com data agendado para os próximos dias.</p>
                 @endforelse
             </div>
 
+
+            <!-- SEÇÃO 2: COMUNICADOS GERAIS (SEM DATA) -->
             <div class="mb-5">
-                <h2 class="h4 fw-bold mb-4 border-start border-secondary border-4 ps-3 text-uppercase text-muted">Avisos Anteriores</h2>
+                <h2 class="h4 fw-bold mb-4 border-start border-info border-4 ps-3 text-uppercase">Comunicados Gerais</h2>
+
+                <div class="row">
+                    @forelse($comunicadosGerais as $aviso)
+                        <div class="col-12 mb-3">
+                            <div class="card border-0 bg-light shadow-sm">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="fw-bold h6 mb-0 text-dark">
+                                            <i class="bi bi-info-circle-fill text-info me-2"></i>{{ $aviso->titulo }}
+                                        </h5>
+                                        
+                                        @auth
+                                            <form action="{{ route('app.avisos.delete', $aviso->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar este comunicado?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-link text-danger p-0 m-0 btn-sm text-decoration-none">
+                                                    <i class="bi bi-trash3 me-1"></i>Excluir
+                                                </button>
+                                            </form>
+                                        @endauth
+                                    </div>
+                                    
+                                    <p class="small text-secondary mb-3 mt-2" style="text-align: justify;">{{ $aviso->descricao }}</p>
+                                    
+                                    <!-- Rodapé do Comunicado com Horário e Local -->
+                                    <div class="border-top pt-2 d-flex align-items-center gap-3 text-muted" style="font-size: 0.8rem;">
+                                        <span>
+                                            <i class="bi bi-clock me-1 text-info"></i> Horário de Funcionamento do Bloco
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-geo-alt me-1 text-info"></i> Campus UEPG
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted small ps-3">Nenhum comunicado informativo fixado.</p>
+                    @endforelse
+                </div>
+            </div>
+
+
+            <div class="mb-5">
+                <h2 class="h4 fw-bold mb-4 border-start border-secondary border-4 ps-3 text-uppercase text-muted">Histórico de Eventos</h2>
 
                 <div class="list-group list-group-flush shadow-sm rounded border">
                     @forelse($anteriores as $aviso)
@@ -127,7 +178,7 @@
                                     @endauth
                                 </div>
                             </div>
-                            <p class="mb-1 small text-secondary mt-2">{{ $aviso->descricao }}</p>
+                            <p class="mb-1 small text-secondary mt-2" style="text-align: justify;">{{ $aviso->descricao }}</p>
                         </div>
                     @empty
                         <div class="list-group-item p-3 text-muted small">Nenhum aviso histórico registrado.</div>
@@ -137,8 +188,8 @@
 
             @auth
                 <div class="text-end mt-4">
-                    <button class="btn btn-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNovoAviso">
-                        <i class="bi bi-plus-circle me-2"></i>Novo Aviso (Painel do Administrador)
+                    <button class="btn btn-dark shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNovoAviso">
+                        <i class="bi bi-plus-circle me-2"></i>Novo Aviso
                     </button>
                 </div>
             @endauth
@@ -149,17 +200,14 @@
                 <div class="card border-0 bg-light shadow-sm mb-4">
                     <div class="card-body p-4">
                         <h4 class="fw-bold mb-4"><i class="bi bi-heart-fill text-danger me-2"></i>Como Ajudar?</h4>
-
                         <div class="mb-4">
                             <h6 class="fw-bold"><i class="bi bi-1-circle-fill text-primary me-2"></i>Descarte Correto</h6>
                             <p class="small text-secondary">Não jogue eletrônicos no lixo comum. Traga-os para nossos pontos de coleta no CSL.</p>
                         </div>
-
                         <div class="mb-4">
                             <h6 class="fw-bold"><i class="bi bi-2-circle-fill text-primary me-2"></i>Divulgação</h6>
                             <p class="small text-secondary">Compartilhe nossas datas de mutirão com seus amigos, familiares e grupos de WhatsApp.</p>
                         </div>
-
                         <div class="mb-0">
                             <h6 class="fw-bold"><i class="bi bi-3-circle-fill text-primary me-2"></i>Voluntariado</h6>
                             <p class="small text-secondary">É aluno da UEPG? Fique atento aos editais de extensão para participar ativamente da equipe.</p>
@@ -177,40 +225,20 @@
     </div>
 </div>
 
-@auth
-<div class="modal fade" id="modalNovoAviso" tabindex="-1" aria-labelledby="modalNovoAvisoLabel" aria-hidden="true">
+<div class="modal fade" id="modalNovoAviso" tabindex="-1" aria-labelledby="modalNovoAvisoTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold" id="modalNovoAvisoLabel"><i class="bi bi-megaphone me-2"></i>Publicar Novo Comunicado</h5>
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white py-3">
+                <h5 class="modal-title fw-bold" id="modalNovoAvisoTitle">
+                    <i class="bi bi-megaphone me-2 text-primary"></i>Criar Novo Comunicado
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('app.avisos.store') }}" method="POST">
-                @csrf
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label for="titulo" class="form-label small fw-bold text-secondary text-uppercase">Título do Aviso</label>
-                        <input type="text" class="form-control" id="titulo" name="titulo" required placeholder="Ex: Mutirão de Coleta no Bloco C">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="data" class="form-label small fw-bold text-secondary text-uppercase">Data do Evento</label>
-                        <input type="date" class="form-control" id="data" name="data" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="descricao" class="form-label small fw-bold text-secondary text-uppercase">Descrição / Conteúdo</label>
-                        <textarea class="form-control" id="descricao" name="descricao" rows="4" required placeholder="Detalhes sobre o horário, ponto de encontro e materiais aceitos..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light p-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-modal="dismiss">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">Publicar Aviso</button>
-                </div>
-            </form>
+            
+            @include('app.forms.form_avisos')
+            
         </div>
     </div>
 </div>
-@endauth
 
 @endsection

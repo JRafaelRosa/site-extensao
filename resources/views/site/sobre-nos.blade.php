@@ -94,7 +94,8 @@
                              class="rounded-circle border border-4 border-white shadow-sm"
                              style="width: 120px; height: 120px; object-fit: cover;">
                     </div>
-
+                    
+                    {{-- Coordendor do projeto --}}
                     <div class="card-body p-4" style="padding-top: 80px !important;">
                         <h4 class="fw-bold mb-1">Prof. Dr. Zito Palhano da Fonseca</h4>
                         <p class="text-primary mb-3 fw-semibold">Coordenador Geral do Projeto</p>
@@ -103,7 +104,7 @@
                         </p>
 
                         <div class="mt-3">
-                            <a href="#" class="btn btn-sm btn-link text-decoration-none">
+                            <a href=" http://lattes.cnpq.br/1692971190679647" class="btn btn-sm btn-link text-decoration-none" target="_blank">
                                 <i class="bi bi-file-earmark-person"></i> Currículo Lattes
                             </a>
                         </div>
